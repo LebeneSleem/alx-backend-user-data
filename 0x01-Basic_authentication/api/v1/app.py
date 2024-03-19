@@ -37,6 +37,37 @@ def not_found(error) -> str:
     return jsonify({"error": "Forbidden"}), 403
 
 
+AUTH_TYPE = os.getenv("AUTH_TYPE")
+
+# check the AUTH_TYPE
+if AUTH_TYPE == 'auth':
+    from api.v1.auth.auth import Auth
+    auth = Auth()
+elif AUTH_TYPE == 'basic_auth':
+    from api.v1.auth.basic_auth import BasicAuth
+    auth = BasicAuth()
+
+
+@app.before_request
+def before_request():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    if auth is None:
+        pass
+    else:
+        excluded_list = ['/api/v1/status/',
+                         '/api/v1/unauthorized/', '/api/v1/forbidden/']
+
+        if auth.require_auth(request.path, excluded_list):
+            if auth.authorization_header(request) is None:
+                abort(401, description="Unauthorized")
+            if auth.current_user(request) is None:
+                abort(403, description='Forbidden')
+
+                
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
