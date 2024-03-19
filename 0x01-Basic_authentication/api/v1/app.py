@@ -66,8 +66,7 @@ def before_request():
                 abort(401, description="Unauthorized")
             if auth.current_user(request) is None:
                 abort(403, description='Forbidden')
-
-                
+   
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
